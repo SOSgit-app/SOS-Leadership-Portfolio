@@ -1,0 +1,17 @@
+{
+  "name": "scorm-portfolio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package-scorm": "node scripts/package-scorm.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

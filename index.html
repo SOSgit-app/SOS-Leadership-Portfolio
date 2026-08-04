@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOS Leadership Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/styles.css?v=20260804b" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container">
+        <div class="title">
+          <div class="title__brand">Squadron Officer School</div>
+          <h1 class="title__h1">Leadership Portfolio Checklist</h1>
+          <div class="title__sub">
+            Track and complete your SOS leadership portfolio requirements. Finish every required item to mark this SCORM
+            attempt as <strong>Completed</strong>.
+          </div>
+        </div>
+        <div class="statusCard" id="statusCard" aria-live="polite">
+          <div class="statusCard__row">
+            <div class="pill" id="pillState">Loading…</div>
+            <div class="statusCard__meta" id="statusMeta"></div>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" id="progressBar"></div>
+          </div>
+          <div id="lmsSaveStatus" class="lms-save-status">Connecting to SCORM…</div>
+          <div class="statusCard__row statusCard__row--small">
+            <div class="row row--wrap">
+              <button class="btn" id="btnSaveExit" type="button">Save &amp; Exit</button>
+              <button class="btn btn--ghost" id="btnRestoreBackup" type="button">Restore Backup</button>
+              <input id="backupFileInput" type="file" accept="application/json,.json" hidden />
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="save-float" role="region" aria-label="Save progress">
+      <div id="lmsSaveStatusFloat" class="save-float__status">Connecting…</div>
+      <button class="btn save-float__btn" id="btnSave" type="button">Save</button>
+    </div>
+
+    <main class="container">
+      <section class="card">
+        <h2 class="h2">Purpose</h2>
+        <div class="muted" style="margin-bottom: 10px">
+          Build a personal leadership toolkit and portfolio you can keep and use beyond SOS—a practical reference for future
+          leadership roles.
+        </div>
+        <ul class="bullets">
+          <li>Develop greater self-awareness as a leader.</li>
+          <li>Build a personal leadership philosophy.</li>
+          <li>Organize tools for future assignments.</li>
+          <li>Identify and maintain personal and professional relationships built at SOS.</li>
+          <li>Create a lasting resource for your career.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">Saving your work (important)</h2>
+        <ul class="bullets">
+          <li>Use <strong>one Canvas tab only</strong> for this assignment.</li>
+          <li>Do <strong>not switch browsers</strong> mid-work (progress is stored in Canvas, not this device).</li>
+          <li>Click <strong>Save</strong> regularly while you work.</li>
+          <li>When you leave, use <strong>Save &amp; Exit</strong> (downloads a sealed backup <code>.json</code> file).</li>
+          <li>If progress resets, use <strong>Restore Backup</strong> with your own <code>.json</code> file (it will not work for another student’s file).</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">How you’ll be assessed</h2>
+        <div class="muted" style="margin-bottom: 12px">
+          Completeness only — Complete or Incomplete based on whether required portfolio components are present.
+        </div>
+        <div class="rubric-wrap">
+          <table class="rubric">
+            <thead>
+              <tr>
+                <th scope="col">Category</th>
+                <th scope="col">Complete</th>
+                <th scope="col">Incomplete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Completeness</th>
+                <td>
+                  All required components are present: leadership philosophy, four weekly reflections (including Project X
+                  on Reflection 3), and at least two personal-choice resources, each marked complete. Instructor and peer
+                  feedback are optional and not required for Completeness.
+                </td>
+                <td>
+                  One or more required components are missing or not marked complete.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">How this works</h2>
+        <ul class="bullets">
+          <li>
+            <strong>Completion is checklist-based</strong>: philosophy, four reflections, and
+            <strong>at least 2 of 3</strong> personal-choice resources — each finished with <strong>Mark complete</strong>.
+            <strong>Instructor and peer feedback are optional</strong> and do not block completion.
+            Rubric is Completeness only — <strong>Complete</strong> or <strong>Incomplete</strong>.
+          </li>
+          <li>
+            <strong>Progress is saved to Canvas</strong> (SCORM). Use <strong>Save</strong> / <strong>Save &amp; Exit</strong> —
+            do not rely on this browser alone.
+          </li>
+          <li>
+            <strong>Type your work here</strong>. Progress is stored in Canvas when you Save.
+          </li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">Required items</h2>
+        <div class="muted">
+          For papers and reflections, type or paste into the entry box (progress saves to Canvas), then
+          <strong>mark complete</strong> to finish the section. Personal-choice items use the resource list
+          <strong>(at least two required)</strong> — select a resource, then mark complete.
+          <strong>Instructor and peer feedback are optional</strong> — not required to complete this activity.
+          Add notes if useful and mark complete only if you choose to record them.
+        </div>
+
+        <div class="items" id="items"></div>
+      </section>
+
+      <footer class="footer muted">
+        <section class="card">
+          <h2 class="h2">Export</h2>
+          <div class="muted">
+            Export a zip package of the contents you have filled out in this activity. The zip has two folders
+            (<strong>Organized</strong> &amp; <strong>Canvas Submission</strong>). Submit the Canvas Submission
+            <code>.txt</code> file to the Canvas assignment labeled
+            <strong>Leadership Philosophy Portfolio Assessment</strong>.
+          </div>
+          <div class="row row--wrap" style="margin-top: 12px">
+            <button class="btn" id="btnExport" type="button">Export package (.zip)</button>
+          </div>
+        </section>
+        <p class="footer__brand">Squadron Officer School · Leadership Portfolio</p>
+      </footer>
+    </main>
+
+    <script src="shared/lz-string.min.js?v=20260804b"></script>
+    <script src="shared/scorm.js?v=20260804b"></script>
+    <script src="shared/jszip.min.js?v=20260804b"></script>
+    <script src="shared/app.js?v=20260804b"></script>
+  </body>
+</html>
