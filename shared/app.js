@@ -494,24 +494,37 @@
       }
 
       const fieldManual = document.createElement("label");
-      fieldManual.className = "field field--full";
+      fieldManual.className = "mark-complete field--full";
       const lab3 = document.createElement("div");
-      lab3.className = "field__label";
+      lab3.className = "mark-complete__label";
       lab3.textContent = "Mark complete";
       const manualWrap = document.createElement("div");
-      manualWrap.className = "row";
+      manualWrap.className = "mark-complete__row";
       const cb = document.createElement("input");
       cb.type = "checkbox";
+      cb.className = "mark-complete__checkbox";
       cb.checked = Boolean(e.manualCompleted);
       const manualText = document.createElement("div");
-      manualText.className = "muted";
+      manualText.className = "mark-complete__hint";
       manualText.textContent = "Check when this item is finalized.";
+
+      function syncMarkCompleteVisual() {
+        const done = Boolean(cb.checked);
+        const blocked = Boolean(cb.disabled);
+        fieldManual.classList.toggle("mark-complete--done", done);
+        fieldManual.classList.toggle("mark-complete--pending", !done && !blocked);
+        fieldManual.classList.toggle("mark-complete--blocked", blocked);
+        fieldManual.classList.toggle("field--disabled", blocked);
+        lab3.textContent = done ? "Marked complete" : "Mark complete — required to finish this section";
+        if (item.required === false && !blocked) {
+          lab3.textContent = done ? "Marked complete (optional)" : "Mark complete (optional)";
+        }
+      }
 
       function refreshManualGate() {
         const prereqMsg = markCompletePrereqMessage(item, entries[item.id]);
         const ok = !prereqMsg;
         cb.disabled = !ok;
-        fieldManual.classList.toggle("field--disabled", !ok);
         if (!ok) {
           if (cb.checked || (entries[item.id] || {}).manualCompleted) {
             cb.checked = false;
@@ -520,9 +533,10 @@
           manualText.textContent = prereqMsg;
         } else {
           manualText.textContent = item.required
-            ? "Check Mark complete to finish this section."
+            ? "Click the box to mark this section complete."
             : "Optional — check only if you want to record this feedback.";
         }
+        syncMarkCompleteVisual();
       }
 
       cb.addEventListener("change", () => {
@@ -532,6 +546,7 @@
           return;
         }
         entries[item.id] = { ...entries[item.id], manualCompleted: cb.checked, updatedAt: nowIso() };
+        syncMarkCompleteVisual();
         onEntriesChanged();
         updateItemCheck(item.id, entries);
         updateHeaderAndScorm(entries);

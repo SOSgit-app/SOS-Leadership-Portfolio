@@ -350,6 +350,63 @@ textarea{min-height:120px; resize:vertical}
   cursor:not-allowed;
 }
 
+.mark-complete{
+  display:block;
+  grid-column:1 / -1;
+  cursor:pointer;
+  border-radius:14px;
+  border:2px solid transparent;
+  padding:14px 16px;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.mark-complete__label{
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.mark-complete__row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.mark-complete__checkbox{
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
+  accent-color: #1B7A4A;
+  cursor:pointer;
+}
+.mark-complete__hint{
+  font-size:14px;
+  line-height:1.35;
+  font-weight:600;
+}
+.mark-complete--pending{
+  background: rgba(180,35,24,.1);
+  border-color: rgba(180,35,24,.55);
+  box-shadow: inset 0 0 0 1px rgba(180,35,24,.12);
+}
+.mark-complete--pending .mark-complete__label{color:#8F1C14}
+.mark-complete--pending .mark-complete__hint{color:#8F1C14}
+.mark-complete--done{
+  background: rgba(27,122,74,.12);
+  border-color: rgba(27,122,74,.55);
+  box-shadow: inset 0 0 0 1px rgba(27,122,74,.12);
+}
+.mark-complete--done .mark-complete__label{color:#145C38}
+.mark-complete--done .mark-complete__hint{color:#145C38}
+.mark-complete--blocked{
+  background: rgba(154,107,0,.08);
+  border-color: rgba(154,107,0,.4);
+  cursor:not-allowed;
+}
+.mark-complete--blocked .mark-complete__label{color:#7A5600}
+.mark-complete--blocked .mark-complete__hint{color:#7A5600}
+.mark-complete--blocked .mark-complete__checkbox{cursor:not-allowed}
+
 .btn{
   appearance:none;
   border:1px solid rgba(0,48,143,.45);
