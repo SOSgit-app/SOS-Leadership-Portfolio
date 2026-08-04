@@ -979,8 +979,7 @@ function sanitizeEntriesForPersist(src) {
 
       zip.file(
         "Canvas Submission/README.txt",
-        "Submit SOS-Leadership-Portfolio-Canvas-Submission.txt to the Canvas assignment labeled:\n" +
-          "Leadership Philosophy Portfolio Assessment\n"
+        "Submit SOS-Leadership-Portfolio-Canvas-Submission.txt to the Canvas assignment labeled: SOS Leadership Portfolio Assessment\n"
       );
       zip.file(
         "Canvas Submission/SOS-Leadership-Portfolio-Canvas-Submission.txt",
