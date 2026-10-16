@@ -2,13 +2,14 @@
 (function () {
   const APP_SUSPEND_KEY = "sos_portfolio_suspend_v2";
   const PERSONAL_CHOICE_REQUIRED = 2;
-  const LAYOUT_VERSION = 3;
+  const LAYOUT_VERSION = 4;
   const BACKUP_SEAL = "SOS-PORTFOLIO-SEAL-v2";
   /** Generous caps so reflections fit easily, while compressed LMS suspend_data stays under ~63k. */
   const CHAR_LIMIT_ENTRY = 8000;
   const CHAR_LIMIT_NOTES = 3000;
 
   let entries = {};
+  let certificate = { fullName: "", classId: "", flightNumber: "" };
   let fieldsHydrated = false;
   let saveTimer = null;
 
@@ -265,6 +266,7 @@
   }
 
   function bindCharLimitedTextarea(ta, counterEl, limit, onValidInput) {
+    let dirty = false;
     ta.maxLength = limit;
     const syncCounter = () => {
       if (ta.value.length > limit) ta.value = ta.value.slice(0, limit);
@@ -274,8 +276,19 @@
       counterEl.classList.toggle("char-count--max", n >= limit);
     };
     ta.addEventListener("input", () => {
+      dirty = true;
       syncCounter();
       onValidInput();
+    });
+    ta.addEventListener("blur", () => {
+      if (!dirty || !fieldsHydrated) return;
+      dirty = false;
+      if (saveTimer) {
+        window.clearTimeout(saveTimer);
+        saveTimer = null;
+      }
+      saveProgress();
+      downloadBackupFile({ quiet: true, filename: "SOS-Portfolio-restore.json" });
     });
     syncCounter();
   }
@@ -315,7 +328,7 @@
     help.className = "field__help";
     help.textContent =
       options.helpText ||
-      `Mark complete to finish this section. Limit ${limit.toLocaleString()} characters. Saved to Canvas with Save / Save & Exit.`;
+      `Mark complete to finish this section. Limit ${limit.toLocaleString()} characters. Leaving this box saves to Canvas and downloads a restore file.`;
     fieldText.appendChild(lab);
     fieldText.appendChild(ta);
     fieldText.appendChild(counter);
@@ -578,13 +591,274 @@ function sanitizeEntriesForPersist(src) {
     return out;
   }
 
+  function sanitizeCertificate(src) {
+    const c = src && typeof src === "object" ? src : {};
+    return {
+      fullName: String(c.fullName || "").trim().slice(0, 120),
+      classId: String(c.classId || "").trim().slice(0, 60),
+      flightNumber: String(c.flightNumber || "").trim().slice(0, 40),
+    };
+  }
+
+  function readCertificateFromDom() {
+    return sanitizeCertificate({
+      fullName: (document.getElementById("certFullName") || {}).value || "",
+      classId: (document.getElementById("certClassId") || {}).value || "",
+      flightNumber: (document.getElementById("certFlightNumber") || {}).value || "",
+    });
+  }
+
+  function writeCertificateToDom(cert) {
+    certificate = sanitizeCertificate(cert);
+    const nameEl = document.getElementById("certFullName");
+    const classEl = document.getElementById("certClassId");
+    const flightEl = document.getElementById("certFlightNumber");
+    if (nameEl) nameEl.value = certificate.fullName;
+    if (classEl) classEl.value = certificate.classId;
+    if (flightEl) flightEl.value = certificate.flightNumber;
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function formatCertificateDate(d) {
+    try {
+      return new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(d || new Date());
+    } catch {
+      return new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  function buildCertificateHtml(certInfo) {
+    const cert = sanitizeCertificate(certInfo);
+    const name = escapeHtml(cert.fullName || "Name not provided");
+    const classId = escapeHtml(cert.classId || "—");
+    const flight = escapeHtml(cert.flightNumber || "—");
+    const dated = escapeHtml(formatCertificateDate(new Date()));
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOS Leadership Portfolio — Certificate of Completion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --af-flag-blue: #00205B;
+      --af-ultramarine: #00308F;
+      --af-gold: #C5A572;
+      --af-gold-light: #E8D5B0;
+      --paper: #F7F4EC;
+      --ink: #0F1C33;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #1a1f2e; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      color: var(--ink);
+    }
+    .sheet {
+      width: min(1100px, 100%);
+      aspect-ratio: 11 / 8.5;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(197,165,114,.18), transparent 55%),
+        linear-gradient(165deg, #fffdf8 0%, var(--paper) 55%, #efe8d8 100%);
+      border: 14px solid var(--af-flag-blue);
+      box-shadow:
+        inset 0 0 0 3px var(--af-gold),
+        inset 0 0 0 10px rgba(0,32,91,.08),
+        0 24px 48px rgba(0,0,0,.35);
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 4vw, 48px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+    .sheet::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(197,165,114,.55);
+      pointer-events: none;
+    }
+    .brand {
+      font-family: "Cinzel", "Times New Roman", serif;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--af-ultramarine);
+      font-size: clamp(14px, 1.8vw, 18px);
+    }
+    .kicker {
+      margin-top: 8px;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: #6a5a3d;
+      font-weight: 700;
+    }
+    .title {
+      margin: 18px 0 8px;
+      font-family: "Cinzel", "Times New Roman", serif;
+      font-size: clamp(28px, 4.2vw, 44px);
+      line-height: 1.1;
+      color: var(--af-flag-blue);
+      font-weight: 700;
+    }
+    .rule {
+      width: min(420px, 55%);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--af-gold), transparent);
+      margin: 10px auto 16px;
+    }
+    .presented {
+      font-size: clamp(14px, 1.6vw, 17px);
+      color: #4a5568;
+      max-width: 48rem;
+      line-height: 1.45;
+    }
+    .recipient {
+      margin: 10px 0 6px;
+      font-family: "Cinzel", "Times New Roman", serif;
+      font-size: clamp(26px, 4vw, 40px);
+      color: var(--af-ultramarine);
+      font-weight: 700;
+      border-bottom: 2px solid rgba(197,165,114,.65);
+      padding: 0 18px 6px;
+      max-width: 90%;
+    }
+    .activity {
+      font-size: clamp(15px, 1.8vw, 19px);
+      font-weight: 700;
+      color: var(--af-flag-blue);
+      margin-top: 8px;
+    }
+    .details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px 36px;
+      margin-top: 22px;
+      width: 100%;
+    }
+    .detail {
+      min-width: 140px;
+    }
+    .detail__label {
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: #6a5a3d;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .detail__value {
+      font-family: "Cinzel", "Times New Roman", serif;
+      font-size: clamp(15px, 1.8vw, 20px);
+      color: var(--af-flag-blue);
+      font-weight: 600;
+    }
+    .footer-line {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #5b6575;
+      letter-spacing: .04em;
+    }
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .actions button {
+      appearance: none;
+      border: 1px solid rgba(0,48,143,.4);
+      background: linear-gradient(180deg, var(--af-ultramarine), var(--af-flag-blue));
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .sheet {
+        box-shadow: none;
+        width: 100%;
+        height: 100vh;
+        aspect-ratio: auto;
+      }
+      .actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div>
+      <div class="brand">Squadron Officer School</div>
+      <div class="kicker">Air University · Maxwell AFB</div>
+      <h1 class="title">Certificate of Completion</h1>
+      <div class="rule"></div>
+      <p class="presented">This certifies that</p>
+      <div class="recipient">${name}</div>
+      <p class="presented">has completed the</p>
+      <div class="activity">SOS Leadership Portfolio</div>
+    </div>
+    <div>
+      <div class="details">
+        <div class="detail">
+          <div class="detail__label">Class ID</div>
+          <div class="detail__value">${classId}</div>
+        </div>
+        <div class="detail">
+          <div class="detail__label">Flight</div>
+          <div class="detail__value">${flight}</div>
+        </div>
+        <div class="detail">
+          <div class="detail__label">Date</div>
+          <div class="detail__value">${dated}</div>
+        </div>
+      </div>
+      <p class="footer-line">Leadership Philosophy · Weekly Reflections · Personal Leadership Resources</p>
+      <div class="actions">
+        <button type="button" onclick="window.print()">Print certificate</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+`;
+  }
+
   function buildProgressPayload() {
+    if (fieldsHydrated) certificate = readCertificateFromDom();
     const completion = computeCompletion(entries, { personalChoiceRequired: PERSONAL_CHOICE_REQUIRED });
     return {
       key: APP_SUSPEND_KEY,
       _layoutVersion: LAYOUT_VERSION,
       _savedAt: Date.now(),
       settings: { personalChoiceRequired: PERSONAL_CHOICE_REQUIRED },
+      certificate: sanitizeCertificate(certificate),
       completion: {
         done: completion.done,
         pct: completion.pct,
@@ -600,15 +874,16 @@ function sanitizeEntriesForPersist(src) {
     // Prefer full entries in _data (v2). Fall back to legacy completedMap-only stubs.
     if (saved._data && typeof saved._data === "object") {
       entries = sanitizeEntriesForPersist(saved._data);
-      return;
-    }
-    if (saved.entries && typeof saved.entries === "object") {
+    } else if (saved.entries && typeof saved.entries === "object") {
       entries = sanitizeEntriesForPersist(saved.entries);
-      return;
-    }
-    // Discard metadata-only stubs from older packages (no real answers).
-    if (saved._externalData || saved.completedMap) {
+    } else if (saved._externalData || saved.completedMap) {
+      // Discard metadata-only stubs from older packages (no real answers).
       console.warn("Ignoring metadata-only / legacy incomplete SCORM stub.");
+    }
+    if (saved.certificate) {
+      writeCertificateToDom(saved.certificate);
+    } else if (saved.settings && saved.settings.certificate) {
+      writeCertificateToDom(saved.settings.certificate);
     }
   }
 
@@ -718,11 +993,12 @@ function sanitizeEntriesForPersist(src) {
     return { payload: inner };
   }
 
-  function downloadBackupFile() {
+  function downloadBackupFile(opts) {
+    const options = opts || {};
     try {
       const sealed = sealBackupForDownload(buildProgressPayload());
       if (sealed.error) {
-        alert(sealed.error);
+        if (!options.quiet) alert(sealed.error);
         return false;
       }
       const json = JSON.stringify(sealed.file, null, 2);
@@ -741,7 +1017,7 @@ function sanitizeEntriesForPersist(src) {
       const safeId = (currentLearnerId() || "student").replace(/[^\w\-.@]/g, "_").slice(0, 24);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "SOS-Portfolio-backup-" + safeId + "-" + stamp + ".json";
+      a.download = options.filename || "SOS-Portfolio-backup-" + safeId + "-" + stamp + ".json";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -915,9 +1191,19 @@ function sanitizeEntriesForPersist(src) {
 
     const saved = ScormAPI.loadSuspendData();
     applySavedState(saved);
+    writeCertificateToDom(certificate);
     fieldsHydrated = true;
     renderAll(entries);
     updateLmsSaveStatus(null);
+
+    ["certFullName", "certClassId", "certFlightNumber"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        certificate = readCertificateFromDom();
+        onEntriesChanged();
+      });
+    });
 
     btnSave.addEventListener("click", () => {
       const result = saveProgress();
@@ -948,6 +1234,14 @@ function sanitizeEntriesForPersist(src) {
     }
 
     btnExport.addEventListener("click", async () => {
+      certificate = readCertificateFromDom();
+      if (!certificate.fullName || !certificate.classId || !certificate.flightNumber) {
+        alert("Enter your full name, class ID, and flight number in Certificate of Completion before exporting.");
+        const section = document.getElementById("certificateSection");
+        if (section) section.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
       const date = new Date().toISOString().slice(0, 10);
       const zipName = `sos-leadership-portfolio-export-${date}.zip`;
       const zip = new JSZip();
@@ -956,14 +1250,16 @@ function sanitizeEntriesForPersist(src) {
       const exportPayload = {
         exportedAt: nowIso(),
         settings: { personalChoiceRequired: PERSONAL_CHOICE_REQUIRED },
+        certificate: sanitizeCertificate(certificate),
         entries: sanitized,
       };
 
-      // Explicit paths (not nested folder() only) so unzippers always show both folders.
+      // Explicit paths so unzippers always show the three folders.
       zip.file(
         "Organized/README.txt",
         "Organized export — one file per portfolio item (plus entries.json).\n" +
-          "For Canvas, use the file inside the Canvas Submission folder instead.\n"
+          "For Canvas, use the file inside the Canvas Submission folder instead.\n" +
+          "Your certificate is in the Certificate of Completion folder.\n"
       );
       zip.file("Organized/entries.json", JSON.stringify(exportPayload, null, 2));
 
@@ -984,6 +1280,15 @@ function sanitizeEntriesForPersist(src) {
       zip.file(
         "Canvas Submission/SOS-Leadership-Portfolio-Canvas-Submission.txt",
         buildCombinedExportText(sanitized)
+      );
+
+      zip.file(
+        "Certificate of Completion/README.txt",
+        "Open SOS-Leadership-Portfolio-Certificate.html in a browser to view or print your certificate.\n"
+      );
+      zip.file(
+        "Certificate of Completion/SOS-Leadership-Portfolio-Certificate.html",
+        buildCertificateHtml(certificate)
       );
 
       const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });

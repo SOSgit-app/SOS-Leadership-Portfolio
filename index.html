@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assets/styles.css?v=20260804c" />
+    <link rel="stylesheet" href="assets/styles.css?v=20261016a" />
   </head>
   <body>
     <header class="topbar">
@@ -120,7 +120,8 @@
             do not rely on this browser alone.
           </li>
           <li>
-            <strong>Type your work here</strong>. Progress is stored in Canvas when you Save.
+            <strong>Type your work here</strong>. Progress is stored in Canvas when you Save. Leaving an entry box after
+            typing also downloads a restore <code>.json</code> file you can use with Restore Backup.
           </li>
         </ul>
       </section>
@@ -138,14 +139,36 @@
         <div class="items" id="items"></div>
       </section>
 
+      <section class="card" id="certificateSection">
+        <h2 class="h2">Certificate of Completion</h2>
+        <div class="muted" style="margin-bottom: 12px">
+          When you finish the portfolio, enter your details below. They appear on the certificate included in your export
+          zip under <strong>Certificate of Completion</strong>.
+        </div>
+        <div class="cert-form">
+          <label class="field">
+            <div class="field__label">Full name</div>
+            <input class="input" id="certFullName" type="text" maxlength="120" autocomplete="name" placeholder="Rank First Last" />
+          </label>
+          <label class="field">
+            <div class="field__label">Class ID</div>
+            <input class="input" id="certClassId" type="text" maxlength="60" placeholder="e.g., SOS-26B" />
+          </label>
+          <label class="field">
+            <div class="field__label">Flight number</div>
+            <input class="input" id="certFlightNumber" type="text" maxlength="40" placeholder="e.g., Flight 12" />
+          </label>
+        </div>
+      </section>
+
       <footer class="footer muted">
         <section class="card">
           <h2 class="h2">Export</h2>
           <div class="muted">
-            Export a zip package of the contents you have filled out in this activity. The zip has two folders
-            (<strong>Organized</strong> &amp; <strong>Canvas Submission</strong>). Submit the Canvas Submission
-            <code>.txt</code> file to the Canvas assignment labeled
-            <strong>SOS Leadership Portfolio Assessment</strong>.
+            Export a zip package of the contents you have filled out in this activity. The zip has three folders:
+            <strong>Organized</strong>, <strong>Canvas Submission</strong>, and <strong>Certificate of Completion</strong>.
+            Submit the Canvas Submission <code>.txt</code> file to the Canvas assignment labeled
+            <strong>SOS Leadership Portfolio Assessment</strong>. Open the certificate HTML file to view or print it.
           </div>
           <div class="row row--wrap" style="margin-top: 12px">
             <button class="btn" id="btnExport" type="button">Export package (.zip)</button>
@@ -155,9 +178,9 @@
       </footer>
     </main>
 
-    <script src="shared/lz-string.min.js?v=20260804c"></script>
-    <script src="shared/scorm.js?v=20260804c"></script>
-    <script src="shared/jszip.min.js?v=20260804c"></script>
-    <script src="shared/app.js?v=20260804c"></script>
+    <script src="shared/lz-string.min.js?v=20261016a"></script>
+    <script src="shared/scorm.js?v=20261016a"></script>
+    <script src="shared/jszip.min.js?v=20261016a"></script>
+    <script src="shared/app.js?v=20261016a"></script>
   </body>
 </html>

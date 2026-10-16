@@ -435,6 +435,15 @@ textarea{min-height:120px; resize:vertical}
 }
 .btn--danger:hover{background: rgba(180,35,24,.14)}
 
+.cert-form{
+  display:grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap:14px;
+}
+@media (max-width: 720px){
+  .cert-form{grid-template-columns:1fr}
+}
+
 .footer{padding:8px 0 26px 0}
 .footer__brand{
   text-align:center;
